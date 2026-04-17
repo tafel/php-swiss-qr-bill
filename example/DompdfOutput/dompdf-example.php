@@ -29,6 +29,13 @@ $html = $output
 $dompdf = new Dompdf();
 $dompdf->setPaper('A4', 'portrait');
 
+// for PHP lower than 8.3, there're problems sometimes when generating images
+if (version_compare(PHP_VERSION, '8.3.0', '<')) {
+    $dompdf->setOptions(new \Dompdf\Options([
+        'chroot' => sys_get_temp_dir()
+    ]));
+}
+
 // important: needs UTF-8
 $html = <<<EOT
 <!DOCTYPE html>

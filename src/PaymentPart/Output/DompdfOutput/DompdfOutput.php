@@ -10,6 +10,7 @@ use Sprain\SwissQrBill\QrBill;
 final class DompdfOutput extends AbstractOutput
 {
     private HtmlOutput $htmlOutput;
+    private array $tmpNormalizedImages = [];
     private const FONT_UNICODE = 'zapfdingbats';
     private const FONT_UNICODE_CHAR_SCISSORS = '"';
     private const FONT_UNICODE_CHAR_DOWN_ARROW = 't';
@@ -33,6 +34,17 @@ final class DompdfOutput extends AbstractOutput
         // add custom styles
         $html .= $this->getTemplate();
 
+        // in PHP<=8.2, images needs to be written to disk
+        if (version_compare(PHP_VERSION, '8.3.0', '<')) {
+            register_shutdown_function([$this, 'cleanupNormalizedImages']);
+
+            $html = preg_replace_callback(
+                '/src="data:(image\/png|image\/svg\+xml);base64,([^"]+)"/',
+                fn($m) => $this->normalizeImageSrc($m[1], $m[2]),
+                $html
+            );
+        }
+
         // replace base HTML special chars with the Dompdf-compatible ones
         $mapping = [
             '\\2702' => self::FONT_UNICODE_CHAR_SCISSORS,
@@ -42,6 +54,26 @@ final class DompdfOutput extends AbstractOutput
         $html = str_replace(array_keys($mapping), array_values($mapping), $html);
 
         return $html;
+    }
+
+    private function normalizeImageSrc(string $mediaType, string $base64): string
+    {
+        $ext = $mediaType === 'image/svg+xml' ? 'svg' : 'png';
+        $tmpFile = tempnam(sys_get_temp_dir(), 'php_swiss_qr_bill_dompdf_') . '.' . $ext;
+        file_put_contents($tmpFile, base64_decode($base64));
+
+        $this->tmpNormalizedImages[] = $tmpFile;
+
+        return 'src="' . $tmpFile. '"';
+    }
+
+    private function cleanupNormalizedImages(): void
+    {
+        foreach ($this->tmpNormalizedImages as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
     }
 
     private function getTemplate(): string

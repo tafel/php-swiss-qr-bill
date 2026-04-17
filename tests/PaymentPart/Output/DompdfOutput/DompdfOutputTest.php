@@ -8,47 +8,46 @@ use Sprain\SwissQrBill\PaymentPart\Output\DompdfOutput\DompdfOutput;
 use Sprain\SwissQrBill\PaymentPart\Output\DisplayOptions;
 use Sprain\SwissQrBill\QrBill;
 use Sprain\SwissQrBill\QrCode\QrCode;
-use Sprain\Tests\SwissQrBill\TestCompactSvgQrCodeTrait;
 use Sprain\Tests\SwissQrBill\TraitValidQrBillsProvider;
 use Dompdf\Dompdf;
 
 final class DompdfOutputTest extends TestCase
 {
     use TraitValidQrBillsProvider;
-    use TestCompactSvgQrCodeTrait;
+    // use TestCompactSvgQrCodeTrait; // no compact on SVG because Dompdf does not support SVG
 
     #[DataProvider('validQrBillsProvider')]
     public function testValidQrBills(string $name, QrBill $qrBill)
     {
         if ($name === 'qr-special-chars-ultimate-debtor') {
-            $this->markTestSkipped('Don\'t know why, but this name comes from nowhere in dev mode...');
+            $this->markTestSkipped('Don\'t know why, but this name comes from nowhere in dev mode, but fails on github...');
             return;
         }
         $variations = [
             [
                 'layout' => (new DisplayOptions())->setPrintable(false),
                 'format' => QrCode::FILE_FORMAT_PNG,
-                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . $this->getCompact() . '.pdf'
+                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . '.pdf'
             ],
             [
                 'layout' => (new DisplayOptions())->setPrintable(true),
                 'format' => QrCode::FILE_FORMAT_PNG,
-                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . $this->getCompact() . '.print.pdf'
+                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . '.print.pdf'
             ],
             [
                 'layout' => (new DisplayOptions())->setPrintable(false)->setDisplayScissors(true),
                 'format' => QrCode::FILE_FORMAT_PNG,
-                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . $this->getCompact() . '.scissors.pdf'
+                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . '.scissors.pdf'
             ],
             [
                 'layout' => (new DisplayOptions())->setPrintable(false)->setDisplayScissors(true)->setPositionScissorsAtBottom(true),
                 'format' => QrCode::FILE_FORMAT_PNG,
-                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . $this->getCompact() . '.scissorsdown.pdf'
+                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . '.scissorsdown.pdf'
             ],
             [
                 'layout' => (new DisplayOptions())->setPrintable(false)->setDisplayTextDownArrows(true),
                 'format' => QrCode::FILE_FORMAT_PNG,
-                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . $this->getCompact() . '.textarrows.pdf'
+                'file' => __DIR__ . '/../../../TestData/DompdfOutput/' . $name . '.textarrows.pdf'
             ]
         ];
 
@@ -57,6 +56,12 @@ final class DompdfOutputTest extends TestCase
 
             $dompdf = new Dompdf();
             $dompdf->setPaper('A4', 'portrait');
+
+            if (version_compare(PHP_VERSION, '8.3.0', '<')) {
+                $dompdf->setOptions(new \Dompdf\Options([
+                    'chroot' => sys_get_temp_dir()
+                ]));
+            }
 
             $dompdfOutput = (new DompdfOutput($qrBill, 'en'));
             $html = $dompdfOutput
