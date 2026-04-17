@@ -17,7 +17,7 @@ final class DompdfOutput extends AbstractOutput
     public function __construct(QrBill $qrBill, string $language)
     {
         parent::__construct($qrBill, $language);
-        $this->htmlOutput = (new HtmlOutput($qrBill, $language));
+        $this->htmlOutput = new HtmlOutput($qrBill, $language);
     }
 
     public function getPaymentPart(): ?string
