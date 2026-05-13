@@ -95,12 +95,62 @@ EOT;
         }
     }
 
+    /**
+     * DOMPDF replace rule is quite different from FPDF or TCPDF
+     *
+     * Root cause: dompdf always pre-registers the 14 standard PDF built-in fonts at
+     * initialization, and the order it assigns aliases (/F1, /F2...) varies between
+     * PHP 8.1 and 8.4 due to internal array handling differences
+     *
+     * Why the PDFs looked identical visually: the page content stream was actually
+     * byte-for-byte the same logic, just with different alias names pointing to the
+     * same underlying fonts
+     *
+     * Why original stream/endstream extraction wasn't enough: it grabbed the right
+     * stream, but the alias names inside it still differed
+     *
+     * The fix: resolving aliases to canonical font names (/F2 → /ZapfDingbats) before
+     * comparison makes the output environment-agnostic
+     *
+     * @param string $fileContents
+     */
     private function getActualPdfContents(string $fileContents): ?string
     {
-        // Extract actual pdf content and ignore all meta data which may differ in different versions of Fpdf
-        $pattern = '/stream(.*?)endstream/s';
-        preg_match($pattern, $fileContents, $matches);
+        // 1. Build font alias → base font name map from font objects
+        // Matches patterns like: /Name /F2 ... /BaseFont /ZapfDingbats
+        preg_match_all(
+            '/\/Name\s+(\/F\d+).*?\/BaseFont\s+(\/\S+)/s',
+            $fileContents,
+            $fontMatches
+        );
+        $fontMap = array_combine($fontMatches[1], $fontMatches[2]);
+        // e.g. ['/F1' => '/Times-Roman', '/F2' => '/ZapfDingbats', ...]
 
-        return $matches[1] ?? null;
+        // 2. Extract ALL streams, decompress, find the page content stream
+        preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $fileContents, $matches);
+
+        $contentStream = null;
+        foreach ($matches[1] as $stream) {
+            $decompressed = @gzuncompress($stream);
+            $candidate = $decompressed !== false ? $decompressed : $stream;
+            // Page content streams contain text operators (BT/ET)
+            if (str_contains($candidate, ' Tf ') && str_contains($candidate, 'BT ')) {
+                $contentStream = $candidate;
+                break;
+            }
+        }
+
+        if ($contentStream === null) {
+            return null;
+        }
+
+        // 3. Replace aliases with real font names so /F2 16.0 Tf → /Helvetica 16.0 Tf
+        // Sort by length descending to avoid /F1 matching inside /F10 etc.
+        uksort($fontMap, fn($a, $b) => strlen($b) - strlen($a));
+        foreach ($fontMap as $alias => $baseName) {
+            $contentStream = str_replace($alias . ' ', $baseName . ' ', $contentStream);
+        }
+
+        return $contentStream;
     }
 }

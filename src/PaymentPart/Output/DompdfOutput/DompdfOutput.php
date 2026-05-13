@@ -34,7 +34,7 @@ final class DompdfOutput extends AbstractOutput
         // add custom styles
         $html .= $this->getTemplate();
 
-        // in PHP<=8.2, images needs to be written to disk
+        // in PHP < 8.3, images needs to be written to disk
         if (version_compare(PHP_VERSION, '8.3.0', '<')) {
             register_shutdown_function([$this, 'cleanupNormalizedImages']);
 
@@ -74,6 +74,7 @@ final class DompdfOutput extends AbstractOutput
                 unlink($file);
             }
         }
+        $this->tmpNormalizedImages = [];
     }
 
     private function getTemplate(): string
@@ -87,6 +88,9 @@ final class DompdfOutput extends AbstractOutput
 <style type="text/css">
     html {
         margin: 0;
+    }
+    #qr-bill {
+        font-family: Arial, Frutiger, Helvetica, "Liberation Sans"  !important;
     }
     #qr-bill-separate-info:before,
     #qr-bill-separate-info-text:before,
