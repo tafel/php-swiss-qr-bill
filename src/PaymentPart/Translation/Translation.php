@@ -67,6 +67,22 @@ final class Translation
             'payableByName' => 'Payable by (name/address)',
             'inFavorOf' => 'In favour of',
             'doNotUseForPayment' => 'DO NOT USE FOR PAYMENT'
+        ],
+
+        'rm' => [
+            'paymentPart' => 'Part da pajament',
+            'creditor' => 'Conto / Da pajar a',
+            'reference' => 'Referenza',
+            'additionalInformation' => 'Infurmaziuns supplementaras',
+            'currency' => 'Valuta',
+            'amount' => 'Import',
+            'receipt' => 'Quittanza',
+            'acceptancePoint' => 'Post da recepziun',
+            'separate' => 'Da distatgar avant che pajar',
+            'payableBy' => 'Da pajar da',
+            'payableByName' => 'Da pajar da (num/adressa)',
+            'inFavorOf' => 'En favur da',
+            'doNotUseForPayment' => 'BETG DUVRAR PER IL PAJAMENT',
         ]
     ];
 

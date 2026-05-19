@@ -41,11 +41,7 @@ final class CreditorInformation implements QrCodeableInterface, SelfValidatableI
     {
         $qrIid = substr($this->iban, 4, 5);
 
-        if ($this->isValid() && (int) $qrIid >= 30000 && (int) $qrIid <= 31999) {
-            return true;
-        }
-
-        return false;
+        return ($this->isValid() && (int) $qrIid >= 30000 && (int) $qrIid <= 31999);
     }
 
     public function getQrCodeData(): array
@@ -61,10 +57,10 @@ final class CreditorInformation implements QrCodeableInterface, SelfValidatableI
         $metadata->addPropertyConstraints('iban', [
             new Assert\NotBlank(),
             new Assert\Iban(),
-            new Assert\Regex([
-                'pattern' => '/^(CH|LI)/',
-                'match' => true
-            ])
+            new Assert\Regex(
+                pattern: '/^(CH|LI)/',
+                match: true
+            )
         ]);
     }
 }

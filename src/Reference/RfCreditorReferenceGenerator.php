@@ -21,10 +21,7 @@ final class RfCreditorReferenceGenerator implements SelfValidatableInterface
         return $generator->doGenerate();
     }
 
-    /**
-     * @internal Will be made private in v5. Use RfCreditorReferenceGenerator::generate() instead.
-     */
-    public function __construct(private string $reference)
+    private function __construct(private string $reference)
     {
         $this->reference = StringModifier::stripWhitespace($reference);
     }
@@ -45,14 +42,14 @@ final class RfCreditorReferenceGenerator implements SelfValidatableInterface
     public static function loadValidatorMetadata(ClassMetadata $metadata): void
     {
         $metadata->addPropertyConstraints('reference', [
-            new Assert\Regex([
-                'pattern' => '/^[a-zA-Z0-9]*$/',
-                'match' => true
-            ]),
-            new Assert\Length([
-                'min' => 1,
-                'max' => 21 // 25 minus 'RF' prefix minus 2-digit check sum
-            ]),
+            new Assert\Regex(
+                pattern: '/^[a-zA-Z0-9]*$/',
+                match: true
+            ),
+            new Assert\Length(
+                min: 1,
+                max: 21 // 25 minus 'RF' prefix minus 2-digit check sum
+            ),
             new Assert\NotBlank()
         ]);
     }

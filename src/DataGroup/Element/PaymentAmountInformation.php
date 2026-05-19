@@ -60,14 +60,8 @@ final class PaymentAmountInformation implements QrCodeableInterface, SelfValidat
 
     public function getQrCodeData(): array
     {
-        if (null !== $this->getAmount()) {
-            $amountOutput = number_format($this->getAmount(), 2, '.', '');
-        } else {
-            $amountOutput = null;
-        }
-
         return [
-            $amountOutput,
+            $this->getFormattedAmountForQrCode(),
             $this->getCurrency()
         ];
     }
@@ -75,17 +69,27 @@ final class PaymentAmountInformation implements QrCodeableInterface, SelfValidat
     public static function loadValidatorMetadata(ClassMetadata $metadata): void
     {
         $metadata->addPropertyConstraints('amount', [
-            new Assert\Range([
-                'min' => 0,
-                'max'=> 999999999.99
-            ]),
+            new Assert\Range(
+                min: 0,
+                max: 999999999.99
+            ),
         ]);
 
         $metadata->addPropertyConstraints('currency', [
-            new Assert\Choice([
+            new Assert\Choice(choices: [
                 self::CURRENCY_CHF,
                 self::CURRENCY_EUR
             ])
         ]);
+    }
+
+    private function getFormattedAmountForQrCode(): ?string
+    {
+        if (null === $this->amount) {
+            return null;
+        }
+
+        // Unlike the formatted code for the payment part, the amount in the qr code has no thousands separator
+        return number_format($this->amount, 2, '.', '');
     }
 }

@@ -25,11 +25,11 @@ In a QR IBAN, the *institute id*, which is defined in the 5th to 9th character, 
 * **How do I create QR bills for international IBANs?**<br>
 You can't. The QR bill by specification only supports IBANs from Switzerland and Liechtenstein.
 
-* **How do I support currencies other than CHF or EUR?**<br>
+* **How do I create QR bills for amounts in currencies other than CHF or EUR?**<br>
 You can't. The QR bill by specification only supports CHF and EUR.
 
 * **How do I change translations to use my own wording?**<br>
-You can't. The translations are defined in the QR bill specification and are not meant to be changed by the user. See [this document](https://github.com/sprain/php-swiss-qr-bill/blob/master/docs/specs/style-guide-en.pdf), page 31.
+You can't. The translations are defined in the QR bill specification and are not meant to be changed by the user. See [this document](https://github.com/sprain/php-swiss-qr-bill/blob/master/docs/specs/style-guide-en-v1.1.pdf), page 31.
 
 * **How do I make my QR bills payable by Twint?**<br>
 See https://github.com/sprain/php-swiss-qr-bill/issues/129 
@@ -43,7 +43,7 @@ The following libraries are currently actively supported:
   The output of `HtmlOutput` is known to be used to generate PDFs with [PrinceXML](https://www.princexml.com), [Docraptor](http://docraptor.com), and [dompdf/dompdf](https://packagist.org/packages/dompdf/dompdf) (with some adjustments as decribed [here](https://github.com/sprain/php-swiss-qr-bill/issues/178#issuecomment-1222752493))
 
 * **Why are you using `final` on most classes? I want to extend them!**<br>
-This library implements the official specification of the QR bill. This implementation is not supposed to be adjusted as it might result in broken QR bills. Therefore many classes are marked as final. If you find the need to extend one of those final classes, you might have found a bug in this library. In that case it will be very helpful if you provide a bug report or even a pull request here. Thank you!
+This library implements the official specification of the QR bill. This implementation is not supposed to be adjusted as it might result in broken QR bills. Therefore many classes are marked as final. If you find the need to extend one of those final classes, you might have found a bug in this library. In that case it will be very helpful if you provide a bug report or even a pull request. Thank you!
 
 
 ## Getting help
@@ -66,7 +66,7 @@ In addition, a minor version will always be published if any visible change in t
 
 This library supports a PHP version as long as it accounts for at least approximately 10% [of current installations](https://packagist.org/packages/sprain/swiss-qr-bill/php-stats).
 
-### Depdendency support
+### Dependency support
 
 Older versions of dependencies are supported as long as they do not hinder further development or account for at least
 approximately 10% of current installations of the corresponding dependency.
@@ -83,13 +83,13 @@ The repository contains the official specifications the library is based on:
 
 - [Swiss Implementation Guidelines QR-bill](docs/specs/ig-qr-bill-v2.3-en.pdf)
 - [Technical information about the QR-IID and QR-IBAN](docs/specs/qr-iid_qr-iban-en.pdf)
-- [Style Guide QR-bill](docs/specs/style-guide-en.pdf)
+- [Style Guide QR-bill](docs/specs/style-guide-en-v1.1.pdf)
 - [Validation Tool](https://validation.iso-payments.ch/gp/qrrechnung/validation/)
 
 For more official information see
 - [https://www.six-group.com/en/products-services/banking-services/payment-standardization/standards/qr-bill.html](https://www.six-group.com/en/products-services/banking-services/payment-standardization/standards/qr-bill.html)
 
-## For contributors of this libray
+## For contributors of this library
 
 How to generate new test data:
 
